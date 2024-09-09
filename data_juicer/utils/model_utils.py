@@ -592,6 +592,12 @@ def prepare_recognizeAnything_model(
     return model
 
 
+def prepare_fastsam_model(pretrained_model_name_or_path):
+    from ultralytics import FastSAM
+
+    return FastSAM(pretrained_model_name_or_path)
+
+
 def prepare_opencv_classifier(model_path):
     import cv2
     model = cv2.CascadeClassifier(model_path)
@@ -611,6 +617,7 @@ MODEL_FUNCTION_MAPPING = {
     'recognizeAnything': prepare_recognizeAnything_model,
     'vllm': prepare_vllm_model,
     'opencv_classifier': prepare_opencv_classifier,
+    'fastsam': prepare_fastsam_model
 }
 
 
