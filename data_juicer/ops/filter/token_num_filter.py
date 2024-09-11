@@ -1,18 +1,17 @@
 import sys
 
+import lazy_loader as lazy
 from jsonargparse.typing import PositiveInt
 
-from data_juicer.utils.availability_utils import AvailabilityChecking
 from data_juicer.utils.constant import Fields, StatsKeys
 from data_juicer.utils.model_utils import get_model, prepare_model
 
-from ..base_op import OPERATORS, Filter
+from ..base_op import AUTOINSTALL, OPERATORS, Filter
 from ..common import get_words_from_document
 
 OP_NAME = 'token_num_filter'
 
-with AvailabilityChecking(['transformers'], OP_NAME):
-    import transformers  # noqa: F401
+transformers = lazy.load('transformers')
 
 
 @OPERATORS.register_module(OP_NAME)
@@ -40,6 +39,7 @@ class TokenNumFilter(Filter):
         :param kwargs: extra args
         """
         super().__init__(*args, **kwargs)
+        AUTOINSTALL.check(['transformers'])
         self.min_num = min_num
         self.max_num = max_num
         self.hf_tokenizer = hf_tokenizer

@@ -1,18 +1,16 @@
 from copy import deepcopy
 
+import lazy_loader as lazy
 from loguru import logger
 
-from data_juicer.utils.availability_utils import AvailabilityChecking
-
-from ..base_op import OPERATORS, Mapper
+from ..base_op import AUTOINSTALL, OPERATORS, Mapper
 
 OP_NAME = 'nlpaug_en_mapper'
 
-with AvailabilityChecking(['nlpaug'], OP_NAME):
-    import nlpaug.augmenter.char as nac
-    import nlpaug.augmenter.word as naw
-    import nlpaug.flow as naf
-    from nlpaug.util import Action
+nlpaug = lazy.load('nlpaug')
+nac = lazy.load('nlpaug.augmenter.char')
+naw = lazy.load('nlpaug.augmenter.word')
+naf = lazy.load('nlpaug.flow')
 
 
 @OPERATORS.register_module(OP_NAME)
@@ -86,6 +84,7 @@ class NlpaugEnMapper(Mapper):
         :param kwargs: extra args
         """
         super().__init__(*args, **kwargs)
+        AUTOINSTALL.check(['nlpaug'])
 
         self.aug_num = aug_num
         if aug_num >= 10:
@@ -97,6 +96,7 @@ class NlpaugEnMapper(Mapper):
 
         aug_pipeline = []
         # word level
+        Action = nlpaug.util.Action
         if delete_random_word:
             aug_pipeline.append(naw.RandomWordAug(action=Action.DELETE))
         if swap_random_word:
