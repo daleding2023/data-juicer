@@ -1,6 +1,7 @@
+import json
 import os
 from time import time
-from typing import Optional
+from typing import Optional, Union
 
 from jsonargparse import Namespace
 from loguru import logger
@@ -30,12 +31,16 @@ class Executor:
     ops in the config file in order and generate a processed dataset.
     """
 
-    def __init__(self, cfg: Optional[Namespace] = None):
+    def __init__(self, cfg: Union[str, Namespace] = None):
         """
         Initialization method.
 
         :param cfg: optional jsonargparse Namespace.
         """
+        if type(cfg) == str:
+            cfg = json.loads(cfg)
+            cfg = Namespace(**cfg)
+
         self.cfg = init_configs() if cfg is None else cfg
 
         self.work_dir = self.cfg.work_dir
@@ -138,11 +143,14 @@ class Executor:
         else:
             raise ValueError(f'Unsupported sample_algo: {sample_algo}')
 
-    def run(self, load_data_np: Optional[PositiveInt] = None):
+    def run(self,
+            load_data_np: Optional[PositiveInt] = None,
+            skip_return=False):
         """
         Running the dataset process pipeline.
 
         :param load_data_np: number of workers when loading the dataset.
+        :param skip_return: skip return for API called.
         :return: processed dataset.
         """
         # 1. format data
@@ -179,4 +187,5 @@ class Executor:
             from data_juicer.utils.compress import compress
             compress(dataset)
 
-        return dataset
+        if not skip_return:
+            return dataset

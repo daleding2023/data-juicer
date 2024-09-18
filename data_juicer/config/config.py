@@ -790,12 +790,14 @@ def prepare_side_configs(ori_config: Union[str, Namespace, Dict]):
     return config
 
 
-def get_init_configs(cfg: Namespace):
+def get_init_configs(cfg):
     """
     set init configs of datajucer for cfg
     """
     temp_dir = tempfile.gettempdir()
     temp_file = os.path.join(temp_dir, 'job_dj_config.json')
+    if type(cfg) == str:
+        cfg = json.loads(cfg)
     if isinstance(cfg, Namespace):
         cfg = namespace_to_dict(cfg)
     # create an temp config file

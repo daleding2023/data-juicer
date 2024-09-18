@@ -1,5 +1,6 @@
+import json
 import os
-from typing import Optional
+from typing import Optional, Union
 
 from jsonargparse import Namespace
 from loguru import logger
@@ -25,12 +26,16 @@ class Analyzer:
     dataset better.
     """
 
-    def __init__(self, cfg: Optional[Namespace] = None):
+    def __init__(self, cfg: Union[str, Namespace] = None):
         """
         Initialization method.
 
         :param cfg: optional jsonargparse Namespace dict.
         """
+        if type(cfg) == str:
+            cfg = json.loads(cfg)
+            cfg = Namespace(**cfg)
+
         self.cfg = init_configs() if cfg is None else cfg
 
         self.work_dir = self.cfg.work_dir
@@ -70,12 +75,14 @@ class Analyzer:
 
     def run(self,
             load_data_np: Optional[PositiveInt] = None,
-            skip_export: bool = False):
+            skip_export: bool = False,
+            skip_return: bool = False):
         """
         Running the dataset analysis pipeline.
 
         :param load_data_np: number of workers when loading the dataset.
         :param skip_export: whether export the results into disk
+        :param skip_return: skip return for API called.
         :return: analyzed dataset.
         """
         # 1. format data
@@ -134,4 +141,5 @@ class Analyzer:
         )
         column_wise_analysis.analyze(skip_export=skip_export)
 
-        return dataset
+        if not skip_return:
+            return dataset
