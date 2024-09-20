@@ -9,7 +9,6 @@ from data_juicer.utils.availability_utils import AvailabilityChecking
 
 with AvailabilityChecking(['ray'], requires_type='dist'):
     import ray
-    import ray.data as rd
 
 
 class RayExecutor:
@@ -47,7 +46,7 @@ class RayExecutor:
         """
         # 1. load data
         logger.info('Loading dataset with Ray...')
-
+        tstart = time.time()
         if self.cfg.get('generated_dataset_config', None):
             generated_dataset_config = self.cfg.generated_dataset_config
             assert isinstance(generated_dataset_config,
@@ -57,22 +56,22 @@ class RayExecutor:
             from data_juicer.format.formatter import FORMATTERS
             dataset = FORMATTERS.modules[obj_name](**args).load_dataset()
         else:
-            dataset = rd.read_json(self.cfg.dataset_path)
-
-        # convert all the path in dataset to absolute path
-        dataset = RayDataset(dataset, self.cfg.dataset_path, self.cfg)
+            dataset = RayDataset.read_jsonl(self.cfg.dataset_path,
+                                            self.cfg,
+                                            resplit=True)
         # 2. extract processes
         logger.info('Preparing process operators...')
         ops = load_ops(self.cfg.process, self.cfg.op_fusion)
 
         # 3. data process
         logger.info('Processing data...')
-        tstart = time.time()
         dataset.process(ops)
-        tend = time.time()
-        logger.info(f'All Ops are done in {tend - tstart:.3f}s.')
 
         # 4. data export
         logger.info('Exporting dataset to disk...')
-        dataset.data.write_json(self.cfg.export_path, force_ascii=False)
+        dataset.write_json(self.cfg.export_path, force_ascii=False)
+
+        tend = time.time()
+        logger.info(f'All Ops are done in {tend - tstart:.3f}s.')
+
         return dataset
