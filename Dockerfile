@@ -16,6 +16,8 @@ RUN wget https://aka.ms/download-jdk/microsoft-jdk-17.0.9-linux-x64.tar.gz -O jd
 ENV JAVA_HOME=/opt/jdk
 
 WORKDIR /data-juicer
+RUN pip install --upgrade pip
+RUN pip install --upgrade setuptools
 
 # install requirements which need to be installed from source
 RUN pip install git+https://github.com/xinyu1205/recognize-anything.git --default-timeout 1000
