@@ -1,8 +1,8 @@
 # The data-juicer image includes all open-source contents of data-juicer,
 # and it will be instaled in editable mode.
 
-#FROM python:3.8.18
-FROM registry.cn-hangzhou.aliyuncs.com/models2024/xinference:python3.8.18
+FROM python:3.8.18
+#FROM registry.cn-hangzhou.aliyuncs.com/models2024/xinference:python3.8.18
 
 # prepare the java env
 WORKDIR /opt
